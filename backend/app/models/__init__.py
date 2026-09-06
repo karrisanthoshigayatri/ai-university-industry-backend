@@ -20,10 +20,18 @@ from app.models.hei import (
     InstitutionalResource,
     ResourceCapability,
 )
+from app.models.evidence import (
+    Availability,
+    CapabilityEvidence,
+    EntityConstraint,
+)
 
 __all__ = [
+    "Availability",
     "Capability",
+    "CapabilityEvidence",
     "CapabilityTaxonomy",
+    "EntityConstraint",
     "FacultyExpertCapability",
     "FacultyExpertProfile",
     "GovernmentProfile",

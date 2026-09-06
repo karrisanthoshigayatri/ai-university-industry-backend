@@ -19,6 +19,7 @@ from app.routes.validation import router as validation_router
 from app.routes.ai_analysis import router as ai_analysis_router
 from app.routes.capability import capability_router, taxonomy_router
 from app.routes.hei import router as hei_router
+from app.routes.evidence import router as evidence_router
 
 
 logger = logging.getLogger(__name__)
@@ -59,6 +60,7 @@ def create_app() -> FastAPI:
     application.include_router(capability_router)
     application.include_router(taxonomy_router)
     application.include_router(hei_router)
+    application.include_router(evidence_router)
 
     # ── Startup: seed capability data ──────────────────────────────────────────
     @application.on_event("startup")
