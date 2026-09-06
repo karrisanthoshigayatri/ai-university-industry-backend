@@ -3,7 +3,7 @@
 from functools import lru_cache
 from pathlib import Path
 
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -31,6 +31,16 @@ class Settings(BaseSettings):
     )
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
+
+    @field_validator("database_url", mode="before")
+    @classmethod
+    def use_psycopg_driver(cls, value: str) -> str:
+        """Use the psycopg v3 driver required by this project."""
+
+        for legacy_scheme in ("postgresql://", "postgres://"):
+            if value.startswith(legacy_scheme):
+                return "postgresql+psycopg://" + value[len(legacy_scheme) :]
+        return value
 
 
 @lru_cache
