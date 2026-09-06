@@ -130,6 +130,16 @@ class Problem(Base):
     validations: Mapped[list["ProblemRelation"]] = relationship(  # type: ignore[name-defined]
         "Validation", back_populates="problem", cascade="all, delete-orphan"
     )
+    # AI analysis results
+    categories: Mapped[list["ProblemCategory"]] = relationship(  # type: ignore[name-defined]
+        "ProblemCategory", back_populates="problem", cascade="all, delete-orphan"
+    )
+    priorities: Mapped[list["ProblemPriority"]] = relationship(  # type: ignore[name-defined]
+        "ProblemPriority", back_populates="problem", cascade="all, delete-orphan"
+    )
+    requirement_profiles: Mapped[list["ProblemRequirementProfile"]] = relationship(  # type: ignore[name-defined]
+        "ProblemRequirementProfile", back_populates="problem", cascade="all, delete-orphan"
+    )
 
 
 class ProblemEvidence(Base):

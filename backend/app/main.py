@@ -15,6 +15,7 @@ from app.routes.users import router as users_router
 from app.routes.problems import router as problems_router
 from app.routes.similarity import router as similarity_router
 from app.routes.validation import router as validation_router
+from app.routes.ai_analysis import router as ai_analysis_router
 
 
 logger = logging.getLogger(__name__)
@@ -49,6 +50,7 @@ def create_app() -> FastAPI:
     application.include_router(problems_router)
     application.include_router(similarity_router)
     application.include_router(validation_router)
+    application.include_router(ai_analysis_router)
 
     @application.get("/api/health", tags=["health"])
     def health_check() -> dict[str, str]:
