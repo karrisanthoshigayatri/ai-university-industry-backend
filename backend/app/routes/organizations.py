@@ -5,7 +5,9 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Response, status
 from sqlalchemy.orm import Session
 
+from app.core.dependencies import require_role
 from app.db.session import get_db
+from app.models.user import User
 from app.schemas.organization import OrganizationCreate, OrganizationResponse, OrganizationUpdate
 from app.services.organization import (
     create_organization,
@@ -20,7 +22,11 @@ router = APIRouter(prefix="/api/organizations", tags=["organizations"])
 
 
 @router.post("", response_model=OrganizationResponse, status_code=status.HTTP_201_CREATED)
-def create(payload: OrganizationCreate, db: Session = Depends(get_db)) -> OrganizationResponse:
+def create(
+    payload: OrganizationCreate,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_role("Government Officer", "System Administrator")),
+) -> OrganizationResponse:
     return create_organization(db, payload)
 
 
@@ -41,11 +47,16 @@ def update(
     organization_id: UUID,
     payload: OrganizationUpdate,
     db: Session = Depends(get_db),
+    _: User = Depends(require_role("Government Officer", "System Administrator")),
 ) -> OrganizationResponse:
     return update_organization(db, organization_id, payload)
 
 
 @router.delete("/{organization_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete(organization_id: UUID, db: Session = Depends(get_db)) -> Response:
+def delete(
+    organization_id: UUID,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_role("System Administrator")),
+) -> Response:
     delete_organization(db, organization_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)

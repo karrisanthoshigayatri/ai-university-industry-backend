@@ -64,3 +64,8 @@ class Organization(Base):
     users: Mapped[list["User"]] = relationship(
         back_populates="organization", cascade="all, delete-orphan"
     )
+    government_profile: Mapped["GovernmentProfile | None"] = relationship(
+        back_populates="organization",
+        uselist=False,
+        cascade="all, delete-orphan",
+    )

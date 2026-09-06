@@ -26,8 +26,7 @@ class Settings(BaseSettings):
         description="SQLAlchemy PostgreSQL connection URL.",
     )
     secret_key: str = Field(
-        default="replace-this-development-key",
-        description="Application secret used by future authentication features.",
+        description="Secret used to sign JWTs; must be supplied by the environment.",
     )
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 30

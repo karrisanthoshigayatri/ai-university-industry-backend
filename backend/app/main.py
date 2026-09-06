@@ -9,6 +9,8 @@ from pydantic import ValidationError
 from app.core.config import get_settings
 from app.db.health import check_database_connection
 from app.routes.organizations import router as organizations_router
+from app.routes.government_profiles import router as government_profiles_router
+from app.routes.auth import router as auth_router
 from app.routes.users import router as users_router
 
 
@@ -38,6 +40,8 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
     application.include_router(organizations_router)
+    application.include_router(government_profiles_router)
+    application.include_router(auth_router)
     application.include_router(users_router)
 
     @application.get("/api/health", tags=["health"])

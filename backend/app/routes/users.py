@@ -5,7 +5,9 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Response, status
 from sqlalchemy.orm import Session
 
+from app.core.dependencies import require_role
 from app.db.session import get_db
+from app.models.user import User
 from app.schemas.user import UserCreate, UserResponse, UserUpdate
 from app.services.user import create_user, delete_user, get_user, get_users, update_user
 
@@ -14,7 +16,11 @@ router = APIRouter(prefix="/api/users", tags=["users"])
 
 
 @router.post("", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
-def create(payload: UserCreate, db: Session = Depends(get_db)) -> UserResponse:
+def create(
+    payload: UserCreate,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_role("System Administrator")),
+) -> UserResponse:
     return create_user(db, payload)
 
 
@@ -30,12 +36,19 @@ def get_one(user_id: UUID, db: Session = Depends(get_db)) -> UserResponse:
 
 @router.put("/{user_id}", response_model=UserResponse)
 def update(
-    user_id: UUID, payload: UserUpdate, db: Session = Depends(get_db)
+    user_id: UUID,
+    payload: UserUpdate,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_role("System Administrator")),
 ) -> UserResponse:
     return update_user(db, user_id, payload)
 
 
 @router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete(user_id: UUID, db: Session = Depends(get_db)) -> Response:
+def delete(
+    user_id: UUID,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_role("System Administrator")),
+) -> Response:
     delete_user(db, user_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
