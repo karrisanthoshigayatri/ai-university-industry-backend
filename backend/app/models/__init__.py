@@ -1,1 +1,6 @@
-"""SQLAlchemy models will be added here in a later implementation phase."""
+"""SQLAlchemy models used by the application."""
+
+from app.models.organization import Organization
+from app.models.user import User
+
+__all__ = ["Organization", "User"]
