@@ -21,6 +21,7 @@ from app.schemas.similarity import (
     SimilarityCheckResponse,
 )
 from app.schemas.user import UserCreate, UserResponse, UserUpdate
+from app.schemas.validation import ValidationCreate, ValidationResponse
 
 __all__ = [
     "EvidenceCreate",
@@ -42,4 +43,6 @@ __all__ = [
     "UserCreate",
     "UserResponse",
     "UserUpdate",
+    "ValidationCreate",
+    "ValidationResponse",
 ]

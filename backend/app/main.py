@@ -14,6 +14,7 @@ from app.routes.auth import router as auth_router
 from app.routes.users import router as users_router
 from app.routes.problems import router as problems_router
 from app.routes.similarity import router as similarity_router
+from app.routes.validation import router as validation_router
 
 
 logger = logging.getLogger(__name__)
@@ -47,6 +48,7 @@ def create_app() -> FastAPI:
     application.include_router(users_router)
     application.include_router(problems_router)
     application.include_router(similarity_router)
+    application.include_router(validation_router)
 
     @application.get("/api/health", tags=["health"])
     def health_check() -> dict[str, str]:

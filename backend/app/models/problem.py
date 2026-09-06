@@ -126,6 +126,10 @@ class Problem(Base):
         back_populates="target_problem",
         cascade="all, delete-orphan",
     )
+    # Validation history
+    validations: Mapped[list["ProblemRelation"]] = relationship(  # type: ignore[name-defined]
+        "Validation", back_populates="problem", cascade="all, delete-orphan"
+    )
 
 
 class ProblemEvidence(Base):

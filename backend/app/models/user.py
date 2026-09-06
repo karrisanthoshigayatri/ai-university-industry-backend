@@ -67,3 +67,6 @@ class User(Base):
     evidence_submitted: Mapped[list["ProblemEvidence"]] = relationship(  # type: ignore[name-defined]
         foreign_keys="ProblemEvidence.submitted_by", back_populates="submitter"
     )
+    validations: Mapped[list["Validation"]] = relationship(  # type: ignore[name-defined]
+        foreign_keys="Validation.validator_id", back_populates="validator"
+    )
