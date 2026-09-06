@@ -32,6 +32,7 @@ from app.models.partner import (
 )
 from app.models.matching import HeiMatch
 from app.models.faculty_resource_match import FacultyResourceMatch
+from app.models.project import Project, ProjectCapability, ProjectResource, ProjectTeam, ProjectTeamMember
 
 __all__ = [
     "Availability",
@@ -52,6 +53,11 @@ __all__ = [
     "PartnerProfile",
     "PartnerSupportOffering",
     "Problem",
+    "Project",
+    "ProjectCapability",
+    "ProjectResource",
+    "ProjectTeam",
+    "ProjectTeamMember",
     "ProblemCategory",
     "ProblemEvidence",
     "ProblemPriority",
