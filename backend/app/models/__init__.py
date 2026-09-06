@@ -30,6 +30,7 @@ from app.models.partner import (
     PartnerProfile,
     PartnerSupportOffering,
 )
+from app.models.matching import HeiMatch
 
 __all__ = [
     "Availability",
@@ -41,6 +42,7 @@ __all__ = [
     "FacultyExpertProfile",
     "GovernmentProfile",
     "HeiCapability",
+    "HeiMatch",
     "HeiProfile",
     "InstitutionalResource",
     "Organization",
