@@ -34,6 +34,7 @@ from app.models.matching import HeiMatch
 from app.models.faculty_resource_match import FacultyResourceMatch
 from app.models.project import Project, ProjectCapability, ProjectResource, ProjectTeam, ProjectTeamMember
 from app.models.capability_gap import CapabilityGap, PartnerMatch
+from app.models.collaboration import CollaborationRequest, ProjectPartner
 
 __all__ = [
     "Availability",
@@ -45,6 +46,7 @@ __all__ = [
     "FacultyExpertProfile",
     "GovernmentProfile",
     "CapabilityGap",
+    "CollaborationRequest",
     "FacultyResourceMatch",
     "HeiCapability",
     "HeiMatch",
@@ -57,6 +59,7 @@ __all__ = [
     "Problem",
     "Project",
     "ProjectCapability",
+    "ProjectPartner",
     "ProjectResource",
     "ProjectTeam",
     "ProjectTeamMember",
