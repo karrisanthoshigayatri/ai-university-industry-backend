@@ -114,6 +114,18 @@ class Problem(Base):
     evidence: Mapped[list["ProblemEvidence"]] = relationship(
         back_populates="problem", cascade="all, delete-orphan"
     )
+    # Relations where this problem is the source
+    relations_as_source: Mapped[list["ProblemRelation"]] = relationship(
+        foreign_keys="ProblemRelation.source_problem_id",
+        back_populates="source_problem",
+        cascade="all, delete-orphan",
+    )
+    # Relations where this problem is the target
+    relations_as_target: Mapped[list["ProblemRelation"]] = relationship(
+        foreign_keys="ProblemRelation.target_problem_id",
+        back_populates="target_problem",
+        cascade="all, delete-orphan",
+    )
 
 
 class ProblemEvidence(Base):
@@ -170,4 +182,80 @@ class ProblemEvidence(Base):
     problem: Mapped["Problem"] = relationship(back_populates="evidence")
     submitter: Mapped["User"] = relationship(  # type: ignore[name-defined]
         foreign_keys=[submitted_by], back_populates="evidence_submitted"
+    )
+
+
+RELATION_TYPES = (
+    "Similar",
+    "Duplicate",
+    "Related",
+    "Consolidated",
+    "Linked",
+)
+
+
+class ProblemRelation(Base):
+    """AI-generated or human-confirmed relationship between two problems.
+
+    The AI may only create 'Similar' relations (human_confirmation=False).
+    A Government Officer or System Administrator must confirm any final
+    Duplicate / Consolidated / Linked decision.
+    """
+
+    __tablename__ = "problem_relation"
+    __table_args__ = (
+        CheckConstraint(
+            "relation_type IN ('Similar', 'Duplicate', 'Related', 'Consolidated', 'Linked')",
+            name="ck_problem_relation_type",
+        ),
+        CheckConstraint(
+            "source_problem_id <> target_problem_id",
+            name="ck_problem_relation_no_self",
+        ),
+        Index("ix_problem_relation_source", "source_problem_id"),
+        Index("ix_problem_relation_target", "target_problem_id"),
+        Index("ix_problem_relation_type", "relation_type"),
+        Index("ix_problem_relation_human_confirmation", "human_confirmation"),
+    )
+
+    relation_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    source_problem_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("problem.problem_id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    target_problem_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("problem.problem_id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    relation_type: Mapped[str] = mapped_column(String(20), nullable=False, default="Similar")
+    similarity_score: Mapped[float | None] = mapped_column(Float, nullable=True)
+    ai_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # False = AI recommendation not yet confirmed; True = human confirmed/rejected
+    human_confirmation: Mapped[bool] = mapped_column(
+        nullable=False, default=False, server_default="false"
+    )
+    decided_by: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("user.user_id", ondelete="SET NULL"),
+        nullable=True,
+    )
+    decided_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+
+    source_problem: Mapped["Problem"] = relationship(
+        foreign_keys=[source_problem_id], back_populates="relations_as_source"
+    )
+    target_problem: Mapped["Problem"] = relationship(
+        foreign_keys=[target_problem_id], back_populates="relations_as_target"
+    )
+    decider: Mapped["User | None"] = relationship(  # type: ignore[name-defined]
+        foreign_keys=[decided_by]
     )

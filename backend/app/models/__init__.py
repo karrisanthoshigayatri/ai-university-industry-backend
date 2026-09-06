@@ -3,6 +3,13 @@
 from app.models.organization import Organization
 from app.models.government_profile import GovernmentProfile
 from app.models.user import User
-from app.models.problem import Problem, ProblemEvidence
+from app.models.problem import Problem, ProblemEvidence, ProblemRelation
 
-__all__ = ["GovernmentProfile", "Organization", "Problem", "ProblemEvidence", "User"]
+__all__ = [
+    "GovernmentProfile",
+    "Organization",
+    "Problem",
+    "ProblemEvidence",
+    "ProblemRelation",
+    "User",
+]

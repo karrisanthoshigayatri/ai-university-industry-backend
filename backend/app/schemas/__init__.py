@@ -14,6 +14,12 @@ from app.schemas.problem import (
     ProblemResponse,
     ProblemUpdate,
 )
+from app.schemas.similarity import (
+    RelationDecisionRequest,
+    RelationResponse,
+    SimilarityCandidate,
+    SimilarityCheckResponse,
+)
 from app.schemas.user import UserCreate, UserResponse, UserUpdate
 
 __all__ = [
@@ -29,6 +35,10 @@ __all__ = [
     "ProblemCreate",
     "ProblemResponse",
     "ProblemUpdate",
+    "RelationDecisionRequest",
+    "RelationResponse",
+    "SimilarityCandidate",
+    "SimilarityCheckResponse",
     "UserCreate",
     "UserResponse",
     "UserUpdate",

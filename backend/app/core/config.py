@@ -31,6 +31,27 @@ class Settings(BaseSettings):
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
 
+    # ── Similarity / Embedding settings ───────────────────────────────────────
+    embedding_enabled: bool = Field(
+        default=False,
+        description="Set to true to use the real BGE model. False uses mock embeddings.",
+    )
+    embedding_model: str = Field(
+        default="BAAI/bge-small-en-v1.5",
+        description="HuggingFace model identifier for BGE embeddings.",
+    )
+    similarity_threshold: float = Field(
+        default=0.75,
+        ge=0.0,
+        le=1.0,
+        description="Minimum cosine similarity to treat two problems as similar.",
+    )
+    similarity_top_k: int = Field(
+        default=5,
+        ge=1,
+        description="Number of top similar problems to return.",
+    )
+
     @field_validator("database_url", mode="before")
     @classmethod
     def use_psycopg_driver(cls, value: str) -> str:
