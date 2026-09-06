@@ -31,6 +31,7 @@ from app.models.partner import (
     PartnerSupportOffering,
 )
 from app.models.matching import HeiMatch
+from app.models.faculty_resource_match import FacultyResourceMatch
 
 __all__ = [
     "Availability",
@@ -41,6 +42,7 @@ __all__ = [
     "FacultyExpertCapability",
     "FacultyExpertProfile",
     "GovernmentProfile",
+    "FacultyResourceMatch",
     "HeiCapability",
     "HeiMatch",
     "HeiProfile",

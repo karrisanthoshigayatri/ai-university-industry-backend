@@ -22,6 +22,7 @@ from app.routes.hei import router as hei_router
 from app.routes.evidence import router as evidence_router
 from app.routes.partner import router as partner_router
 from app.routes.matching import router as matching_router
+from app.routes.faculty_resource_match import router as fr_match_router
 
 
 logger = logging.getLogger(__name__)
@@ -65,6 +66,7 @@ def create_app() -> FastAPI:
     application.include_router(evidence_router)
     application.include_router(partner_router)
     application.include_router(matching_router)
+    application.include_router(fr_match_router)
 
     # ── Startup: seed capability data ──────────────────────────────────────────
     @application.on_event("startup")
