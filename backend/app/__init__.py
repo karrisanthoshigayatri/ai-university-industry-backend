@@ -1,0 +1,1 @@
+"""Application package for the Smart AI Problem-to-Impact platform."""
