@@ -61,3 +61,9 @@ class User(Base):
     )
 
     organization: Mapped["Organization"] = relationship(back_populates="users")
+    problems: Mapped[list["Problem"]] = relationship(  # type: ignore[name-defined]
+        foreign_keys="Problem.submitter_id", back_populates="submitter"
+    )
+    evidence_submitted: Mapped[list["ProblemEvidence"]] = relationship(  # type: ignore[name-defined]
+        foreign_keys="ProblemEvidence.submitted_by", back_populates="submitter"
+    )
