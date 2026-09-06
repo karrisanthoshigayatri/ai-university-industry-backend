@@ -74,3 +74,8 @@ class Organization(Base):
         uselist=False,
         cascade="all, delete-orphan",
     )
+    partner_profile: Mapped["PartnerProfile | None"] = relationship(  # type: ignore[name-defined]
+        back_populates="organization",
+        uselist=False,
+        cascade="all, delete-orphan",
+    )

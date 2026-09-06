@@ -25,6 +25,11 @@ from app.models.evidence import (
     CapabilityEvidence,
     EntityConstraint,
 )
+from app.models.partner import (
+    PartnerCapability,
+    PartnerProfile,
+    PartnerSupportOffering,
+)
 
 __all__ = [
     "Availability",
@@ -39,6 +44,9 @@ __all__ = [
     "HeiProfile",
     "InstitutionalResource",
     "Organization",
+    "PartnerCapability",
+    "PartnerProfile",
+    "PartnerSupportOffering",
     "Problem",
     "ProblemCategory",
     "ProblemEvidence",
