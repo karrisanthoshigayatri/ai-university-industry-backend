@@ -24,6 +24,7 @@ from app.routes.partner import router as partner_router
 from app.routes.matching import router as matching_router
 from app.routes.faculty_resource_match import router as fr_match_router
 from app.routes.project import router as project_router
+from app.routes.capability_gap import router as cap_gap_router
 
 
 logger = logging.getLogger(__name__)
@@ -69,6 +70,7 @@ def create_app() -> FastAPI:
     application.include_router(matching_router)
     application.include_router(fr_match_router)
     application.include_router(project_router)
+    application.include_router(cap_gap_router)
 
     # ── Startup: seed capability data ──────────────────────────────────────────
     @application.on_event("startup")
