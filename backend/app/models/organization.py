@@ -69,3 +69,8 @@ class Organization(Base):
         uselist=False,
         cascade="all, delete-orphan",
     )
+    hei_profile: Mapped["HeiProfile | None"] = relationship(  # type: ignore[name-defined]
+        back_populates="organization",
+        uselist=False,
+        cascade="all, delete-orphan",
+    )
