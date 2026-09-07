@@ -1,4 +1,4 @@
-"""Create or patch the validation table.
+﻿"""Create or patch the validation table.
 
 The table already exists in Supabase with validator_id FK pointing to app_user.
 This migration adds missing columns/indexes and re-points the FK to 'user'.
@@ -38,7 +38,7 @@ def upgrade() -> None:
     connection = op.get_bind()
     existing_tables = set(inspect(connection).get_table_names(schema="public"))
 
-    # ── Fresh create ───────────────────────────────────────────────────────────
+    # ΓöÇΓöÇ Fresh create ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
     if "validation" not in existing_tables:
         op.create_table(
             "validation",
@@ -80,7 +80,7 @@ def upgrade() -> None:
         op.create_index("ix_validation_status",       "validation", ["validation_status"])
         return
 
-    # ── Patch existing table ───────────────────────────────────────────────────
+    # ΓöÇΓöÇ Patch existing table ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
     cols = _col_names(connection, "validation")
 
     # Fix validated_at timezone if missing
@@ -96,7 +96,7 @@ def upgrade() -> None:
     if "field_verification_required" not in cols:
         op.add_column("validation", sa.Column("field_verification_required", sa.Boolean(), nullable=True))
 
-    # Re-point validator_id FK from app_user → user
+    # Re-point validator_id FK from app_user ΓåÆ user
     existing_fks = _fks(connection, "validation")
     for fk in existing_fks:
         if fk["constrained_columns"] == ["validator_id"] and fk["referred_table"] != "user":

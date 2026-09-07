@@ -35,8 +35,10 @@ from app.models.faculty_resource_match import FacultyResourceMatch
 from app.models.project import Project, ProjectCapability, ProjectResource, ProjectTeam, ProjectTeamMember
 from app.models.capability_gap import CapabilityGap, PartnerMatch
 from app.models.collaboration import CollaborationRequest, ProjectPartner
+from app.models.milestone import AuditLog, ProjectMilestone, ProjectOutput
 
 __all__ = [
+    "AuditLog",
     "Availability",
     "Capability",
     "CapabilityEvidence",
@@ -61,6 +63,8 @@ __all__ = [
     "ProjectCapability",
     "ProjectPartner",
     "ProjectResource",
+    "ProjectMilestone",
+    "ProjectOutput",
     "ProjectTeam",
     "ProjectTeamMember",
     "ProblemCategory",
