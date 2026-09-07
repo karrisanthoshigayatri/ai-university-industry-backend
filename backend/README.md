@@ -1,82 +1,171 @@
 # Smart AI Problem-to-Impact Backend
 
-This directory contains the initial FastAPI backend foundation. Business modules, authentication, AI integrations, and database models will be added in later phases.
+FastAPI backend implementing 25 steps of the AI-driven Problem-to-Impact platform for university–industry collaboration.
 
-## Requirements
+## Architecture Overview
 
-- Python 3.12 or newer
-- PostgreSQL for database-backed features
-
-## Setup on Windows
-
-Open PowerShell in the `backend` directory and create a virtual environment:
-
-```powershell
-py -3.12 -m venv .venv
+```
+Problem Submission
+    → Similarity / Duplicate Detection (BGE embeddings, mock-safe)
+    → Government Validation
+    → AI Analysis (Qwen2.5, mock-safe)
+    → HEI Matching (deterministic scoring)
+    → Faculty / Resource Matching
+    → Project Creation
+    → Capability Gap Analysis
+    → Partner Matching
+    → Collaboration → Project Partner
+    → Milestones → Outputs
+    → Impact Records → Beneficiaries
+    → Notifications → Audit Log
 ```
 
-Activate it:
+## Tech Stack
 
-```powershell
-.\.venv\Scripts\Activate.ps1
+- **Framework:** FastAPI 0.115
+- **ORM:** SQLAlchemy 2.x
+- **Database:** PostgreSQL (Supabase)
+- **Migrations:** Alembic
+- **Auth:** JWT (python-jose), argon2 (pwdlib)
+- **AI:** Qwen2.5 (optional, `ai_enabled=false` for mock)
+- **Embeddings:** BGE (optional, `embedding_enabled=false` for mock)
+
+## Setup
+
+### 1. Prerequisites
+
+- Python 3.11+
+- PostgreSQL (or Supabase project)
+
+### 2. Clone and install
+
+```bash
+git clone https://github.com/karrisanthoshigayatri/ai-university-industry-backend.git
+cd ai-university-industry-backend/backend
+python -m venv .venv
+.venv\Scripts\activate          # Windows
+# source .venv/bin/activate     # Linux/Mac
+pip install -r requirements.txt
 ```
 
-Install the dependencies:
+### 3. Environment variables
 
-```powershell
-python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
+Copy `.env.example` to `.env` and fill in your values:
+
+```bash
+cp .env.example .env
 ```
 
-## Configuration
+Required variables:
 
-Copy `.env.example` to `.env` and replace the placeholder values. `DATABASE_URL` should use a PostgreSQL SQLAlchemy URL, for example:
+| Variable | Description |
+|---|---|
+| `DATABASE_URL` | PostgreSQL connection string |
+| `SECRET_KEY` | JWT signing secret (long random string) |
+| `ALGORITHM` | JWT algorithm (default: `HS256`) |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | Token lifetime (default: `30`) |
+| `AI_ENABLED` | Set `true` to use real Qwen2.5 (default: `false`) |
+| `EMBEDDING_ENABLED` | Set `true` to use real BGE embeddings (default: `false`) |
 
-```text
-postgresql+psycopg://<username>:<password>@<host>:<port>/<database>
+### 4. Database / Supabase setup
+
+Create a PostgreSQL database or Supabase project. Set `DATABASE_URL` accordingly.
+
+```bash
+python -m alembic upgrade head
 ```
 
-Use a long, randomly generated value for `SECRET_KEY`. Do not commit `.env` or place real secrets in source control.
+### 5. Run the server
 
-## Run the server
-
-```powershell
-python -m uvicorn app.main:app --reload
+```bash
+python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
 ```
 
-The API will be available at `http://127.0.0.1:8000`.
+Swagger UI: http://127.0.0.1:8000/docs
 
-## Swagger documentation
+## Seed Commands
 
-Open [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs) in a browser.
+### Capability taxonomy (auto-runs at startup)
 
-## Health check
+The capability taxonomy seed runs automatically when the app starts. It is idempotent.
 
-With the server running, use PowerShell:
+### Demo data (manual, run once)
 
-```powershell
-Invoke-RestMethod http://127.0.0.1:8000/api/health
+```bash
+python -m app.services.demo_seed
 ```
 
-Expected response:
+Creates:
+- Government organization + officer (`officer@demo.gov.in` / `Demo@1234`)
+- 3 HEIs (NITK, IISc, UAS) with faculty, resources, capabilities
+- 3 partners (Industry, Startup, CSR) with capabilities and offerings
+- Demo problem: *"Village requires smart irrigation monitoring"*
 
-```json
-{
-  "status": "ok",
-  "message": "Backend is running"
-}
+## Migration Commands
+
+```bash
+# Apply all migrations
+python -m alembic upgrade head
+
+# Check current revision
+python -m alembic current
+
+# See migration history
+python -m alembic history
 ```
 
-## Alembic
+## Test Commands
 
-Alembic is configured for future migrations and currently has no revisions or database tables managed by this project. Migration commands should be run from this directory after models are introduced.
+```bash
+# Run all tests
+python -m pytest tests/ -v
 
-## Database connectivity check
+# Run a specific test file
+python -m pytest tests/test_integration.py -v
 
-The database check is optional and does not run during application startup. After configuring PostgreSQL and `.env`, run:
-
-```powershell
-python -c "from app.db.health import check_database_connection; print(check_database_connection())"
+# Run with summary only
+python -m pytest tests/ --tb=no -q
 ```
 
-It prints `True` when the configured PostgreSQL database accepts a connection and `False` otherwise.
+## API Documentation
+
+Full Swagger UI available at: http://127.0.0.1:8000/docs
+
+### Key endpoint groups
+
+| Tag | Base Path | Description |
+|---|---|---|
+| auth | `/api/auth` | Register, login, JWT |
+| organizations | `/api/organizations` | Org management |
+| problems | `/api/problems` | Problem CRUD + evidence + similarity |
+| hei | `/api/heis` | HEI profiles + capabilities + faculty + resources |
+| partners | `/api/partners` | Partner registry + capabilities + offerings |
+| matching | `/api/matching/...` | HEI, Faculty, Resource, Partner matching |
+| projects | `/api/projects` | Project lifecycle management |
+| capability-gaps | `/api/projects/{id}/capability-gaps` | Gap analysis |
+| collaboration | `/api/projects/{id}/collaboration-requests` | Collaboration |
+| milestones-outputs | `/api/projects/{id}/milestones` | Milestones + outputs |
+| impact-notifications-audit | `/api/projects/{id}/impact` | Impact, notifications, audit |
+
+## AI / Embedding Configuration
+
+Both AI features are **disabled by default** — the backend starts and operates fully without any local AI runtime:
+
+- `AI_ENABLED=false` → Deterministic mock output from Qwen2.5 analysis
+- `EMBEDDING_ENABLED=false` → Mock embeddings for similarity detection
+
+To enable with local Ollama:
+```env
+AI_ENABLED=true
+AI_PROVIDER=local
+AI_BASE_URL=http://localhost:11434/v1
+QWEN_MODEL=qwen2.5
+```
+
+## Security
+
+- JWT tokens expire in 30 minutes
+- Passwords hashed with argon2
+- `.env` is gitignored
+- Sensitive fields (`password_hash`, `secret_key`, `token`) never appear in audit logs
+- CORS enabled for all origins (configure for production)
