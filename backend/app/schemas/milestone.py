@@ -61,25 +61,21 @@ class MilestoneResponse(BaseModel):
 # ── Output ─────────────────────────────────────────────────────────────────────
 
 class OutputCreate(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
     output_type: OutputType
     title: str = Field(min_length=1)
     description: str | None = None
     evidence: str | None = None
     output_date: date | None = Field(default=None, alias="date")
 
-    class Config:
-        populate_by_name = True
-
 
 class OutputUpdate(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
     output_type: OutputType | None = None
     title: str | None = Field(default=None, min_length=1)
     description: str | None = None
     evidence: str | None = None
     output_date: date | None = Field(default=None, alias="date")
-
-    class Config:
-        populate_by_name = True
 
 
 class OutputResponse(BaseModel):

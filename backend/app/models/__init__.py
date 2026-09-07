@@ -36,10 +36,13 @@ from app.models.project import Project, ProjectCapability, ProjectResource, Proj
 from app.models.capability_gap import CapabilityGap, PartnerMatch
 from app.models.collaboration import CollaborationRequest, ProjectPartner
 from app.models.milestone import AuditLog, ProjectMilestone, ProjectOutput
+from app.models.impact import Beneficiary, Feedback, ImpactRecord
+from app.models.notification import Notification
 
 __all__ = [
     "AuditLog",
     "Availability",
+    "Beneficiary",
     "Capability",
     "CapabilityEvidence",
     "CapabilityTaxonomy",
@@ -53,6 +56,7 @@ __all__ = [
     "HeiCapability",
     "HeiMatch",
     "HeiProfile",
+    "ImpactRecord",
     "InstitutionalResource",
     "Organization",
     "PartnerCapability",
@@ -65,6 +69,7 @@ __all__ = [
     "ProjectResource",
     "ProjectMilestone",
     "ProjectOutput",
+    "Notification",
     "ProjectTeam",
     "ProjectTeamMember",
     "ProblemCategory",
