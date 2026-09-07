@@ -1,82 +1,69 @@
-# Smart AI Problem-to-Impact Backend
+# Smart AI Problem-to-Impact — Backend
 
-This directory contains the initial FastAPI backend foundation. Business modules, authentication, AI integrations, and database models will be added in later phases.
+FastAPI backend for the AI-driven university–industry collaboration platform. Steps 1–28 implemented.
 
-## Requirements
+## Quick Start
 
-- Python 3.12 or newer
-- PostgreSQL for database-backed features
-
-## Setup on Windows
-
-Open PowerShell in the `backend` directory and create a virtual environment:
-
-```powershell
-py -3.12 -m venv .venv
+```bash
+cd backend
+python -m venv .venv
+.venv\Scripts\activate          # Windows
+pip install -r requirements.txt
+cp .env.example .env            # fill in DATABASE_URL and SECRET_KEY
+python -m alembic upgrade head
+python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
 ```
 
-Activate it:
+Swagger UI: http://127.0.0.1:8000/docs
 
-```powershell
-.\.venv\Scripts\Activate.ps1
+## Environment Variables
+
+| Variable | Required | Default | Description |
+|---|---|---|---|
+| `DATABASE_URL` | ✅ | — | PostgreSQL connection string |
+| `SECRET_KEY` | ✅ | — | JWT signing key |
+| `ALGORITHM` | | `HS256` | JWT algorithm |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | | `30` | Token lifetime |
+| `AI_ENABLED` | | `false` | `true` = real Qwen2.5 via Ollama |
+| `EMBEDDING_ENABLED` | | `false` | `true` = real BGE embeddings |
+
+Both AI features default to **false** — the backend runs fully without GPU or Ollama.
+
+## Commands
+
+```bash
+# Apply migrations
+python -m alembic upgrade head
+
+# Run demo seed (idempotent)
+python -m app.services.demo_seed
+
+# Run tests
+python -m pytest tests/ -v
+
+# Run tests (summary only)
+python -m pytest tests/ --tb=no -q
 ```
 
-Install the dependencies:
+## Demo Seed
 
-```powershell
-python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
+```bash
+python -m app.services.demo_seed
 ```
 
-## Configuration
+Creates: Karnataka Government + officer · 3 HEIs (NITK, IISc, UAS) · Faculty + resources · 3 Partners (AgroTech/Industry, SmartFarm/Startup, Rural Dev/CSR) · Demo problem: *"Village requires smart irrigation monitoring"*
 
-Copy `.env.example` to `.env` and replace the placeholder values. `DATABASE_URL` should use a PostgreSQL SQLAlchemy URL, for example:
+Demo login: `officer@demo.gov.in` / `Demo@1234`
 
-```text
-postgresql+psycopg://<username>:<password>@<host>:<port>/<database>
+## Architecture
+
+```
+Problem Submission → Similarity → Government Validation → AI Analysis
+  → HEI Matching → Faculty/Resource Matching → Project Creation
+  → Capability Gap → Partner Matching → Collaboration
+  → Project Partner → Milestones → Outputs → Impact → Audit Log
 ```
 
-Use a long, randomly generated value for `SECRET_KEY`. Do not commit `.env` or place real secrets in source control.
+## Test Results
 
-## Run the server
-
-```powershell
-python -m uvicorn app.main:app --reload
-```
-
-The API will be available at `http://127.0.0.1:8000`.
-
-## Swagger documentation
-
-Open [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs) in a browser.
-
-## Health check
-
-With the server running, use PowerShell:
-
-```powershell
-Invoke-RestMethod http://127.0.0.1:8000/api/health
-```
-
-Expected response:
-
-```json
-{
-  "status": "ok",
-  "message": "Backend is running"
-}
-```
-
-## Alembic
-
-Alembic is configured for future migrations and currently has no revisions or database tables managed by this project. Migration commands should be run from this directory after models are introduced.
-
-## Database connectivity check
-
-The database check is optional and does not run during application startup. After configuring PostgreSQL and `.env`, run:
-
-```powershell
-python -c "from app.db.health import check_database_connection; print(check_database_connection())"
-```
-
-It prints `True` when the configured PostgreSQL database accepts a connection and `False` otherwise.
+155 passed · 2 skipped (app_user FK isolation) · 0 failed
