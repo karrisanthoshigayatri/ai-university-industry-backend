@@ -147,6 +147,7 @@ def test_04_feedback():
                           "comment": "Good progress", "feedback_type": "citizen"})
     assert r.status_code == 201, r.text
     assert r.json()["rating"] == 4
+    assert r.json()["submitted_by"] == str(_s.gov.user_id)
 
     r2 = client.get("/api/feedback/summary", headers=_bearer(_s.gov),
                     params={"project_id": _s._proj_id})
@@ -156,25 +157,59 @@ def test_04_feedback():
     assert d["average_rating"] is not None
 
 
-# ── TEST 5 — Notification endpoint reachability ───────────────────────────────
+# ── TEST 5 — Notification read/unread ─────────────────────────────────────────
 
 def test_05_notifications():
-    # Notifications endpoint reachable — returns empty list (recipient not in app_user)
-    r = client.get("/api/notifications", headers=_bearer(_s.gov))
+    # Create a notification directly in DB
+    db = SessionLocal()
+    try:
+        from datetime import datetime, timezone
+        n = Notification(
+            recipient_id=_s.gov.user_id,
+            event_type="milestone_update",
+            message="Milestone Phase 1 completed",
+            status="Unread",
+            created_at=datetime.now(timezone.utc).replace(tzinfo=None),
+        )
+        db.add(n); db.commit()
+        notif_id = str(n.notification_id)
+    finally:
+        db.close()
+
+    r = client.get("/api/notifications/unread", headers=_bearer(_s.gov))
     assert r.status_code == 200, r.text
-    assert isinstance(r.json(), list)
+    ids = [x["notification_id"] for x in r.json()]
+    assert notif_id in ids
 
-    r2 = client.get("/api/notifications/unread", headers=_bearer(_s.gov))
+    r2 = client.put(f"/api/notifications/{notif_id}/read", headers=_bearer(_s.gov))
     assert r2.status_code == 200, r2.text
-    assert isinstance(r2.json(), list)
+    assert r2.json()["status"] == "Read"
+    assert r2.json()["read_at"] is not None
 
 
-# ── TEST 6 — Mark all read (empty case) ───────────────────────────────────────
+# ── TEST 6 — Mark all read ────────────────────────────────────────────────────
 
 def test_06_mark_all_read():
+    db = SessionLocal()
+    try:
+        from datetime import datetime, timezone
+        for _ in range(2):
+            db.add(Notification(
+                recipient_id=_s.gov.user_id, event_type="project_completion",
+                message="Done", status="Unread",
+                created_at=datetime.now(timezone.utc).replace(tzinfo=None),
+            ))
+        db.commit()
+    finally:
+        db.close()
+
     r = client.put("/api/notifications/read-all", headers=_bearer(_s.gov))
     assert r.status_code == 200, r.text
     assert "marked as read" in r.json()["detail"]
+
+    r2 = client.get("/api/notifications/unread", headers=_bearer(_s.gov))
+    assert r2.status_code == 200, r2.text
+    assert len(r2.json()) == 0
 
 
 # ── TEST 7 — Audit log creation via service ────────────────────────────────────
