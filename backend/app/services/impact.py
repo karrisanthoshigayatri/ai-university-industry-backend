@@ -112,7 +112,7 @@ def create_impact(db: Session, project_id: UUID, payload: ImpactCreate,
                        **payload.model_dump())
     db.add(obj)
     db.commit(); db.refresh(obj)
-    audit_event(db, None, "create", "impact_record", obj.impact_id,
+    audit_event(db, current_user.user_id, "create", "impact_record", obj.impact_id,
                 new_value={"metric": obj.metric})
     db.commit()
     return obj
@@ -230,7 +230,7 @@ def create_feedback(db: Session, payload: FeedbackCreate, current_user: User) ->
     if not payload.project_id and not payload.problem_id:
         raise HTTPException(status_code=400, detail="Either project_id or problem_id is required.")
     data = payload.model_dump()
-    obj = Feedback(submitted_by=None,
+    obj = Feedback(submitted_by=current_user.user_id,
                    submitted_at=_now_naive(), **data)
     db.add(obj); db.commit(); db.refresh(obj)
     return obj

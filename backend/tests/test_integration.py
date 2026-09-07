@@ -159,8 +159,8 @@ def test_auth_health_and_registration():
 
 def test_auth_role_protection():
     """Forbidden roles and unauthorized access."""
-    # No token → 401 on a protected endpoint
-    assert client.get("/api/heis", headers={}).status_code == 401
+    # No token → 401
+    assert client.get("/api/users").status_code == 401
     # Citizen cannot create organizations
     r = client.post("/api/organizations", headers=_bearer(_i.citizen),
                     json={"name": "Test", "organization_type": "Government"})
