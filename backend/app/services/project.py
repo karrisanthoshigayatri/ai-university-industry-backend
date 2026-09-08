@@ -39,21 +39,21 @@ def _get_or_404(db: Session, model, pk, label: str):
     return obj
 
 
-def _assert_write(current_user: User, project: Project) -> None:
+def _assert_hei_owns_project(db: Session, current_user: User, project: Project) -> None:
+    """System Admins pass freely. HEI Administrators must own the project's HEI."""
     if current_user.role in _ADMIN:
         return
-    if current_user.role not in _WRITE_ROLES:
-        raise HTTPException(status_code=403, detail="Insufficient permissions.")
-    # HEI Admins/Gov Officers must belong to the project's HEI org
     if current_user.role == "HEI Administrator":
-        hei = db_get_hei_by_id(None, project.hei_id)
-        if hei and current_user.organization_id != hei.organization_id:
-            raise HTTPException(status_code=403, detail="You can only manage your own HEI's projects.")
+        hei = db.get(HeiProfile, project.hei_id)
+        if hei is None or current_user.organization_id != hei.organization_id:
+            raise HTTPException(
+                status_code=403,
+                detail="HEI Administrators can only manage their own HEI's projects.",
+            )
 
 
-def db_get_hei_by_id(db, hei_id) -> HeiProfile | None:
-    # used in _assert_write — avoids circular db ref
-    return None  # fallback; actual check done in service functions with db
+def db_get_hei_by_id(db, hei_id) -> HeiProfile | None:  # noqa: ARG001
+    return None
 
 
 # ══════════════════════════════════════════════════════════════════════════════
