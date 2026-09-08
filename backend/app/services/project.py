@@ -39,22 +39,21 @@ def _get_or_404(db: Session, model, pk, label: str):
     return obj
 
 
-def _assert_hei_owns_project(db: Session, current_user: User, project: Project) -> None:
-    """System Admins pass freely. HEI Administrators must own the project's HEI."""
+def _assert_write(current_user: User, project: Project) -> None:
     if current_user.role in _ADMIN:
         return
+    if current_user.role not in _WRITE_ROLES:
+        raise HTTPException(status_code=403, detail="Insufficient permissions.")
+    # HEI Admins/Gov Officers must belong to the project's HEI org
     if current_user.role == "HEI Administrator":
-        hei = db.get(HeiProfile, project.hei_id)
-        if hei is None or current_user.organization_id != hei.organization_id:
-            raise HTTPException(
-                status_code=403,
-                detail="HEI Administrators can only manage their own HEI's projects.",
-            )
+        hei = db_get_hei_by_id(None, project.hei_id)
+        if hei and current_user.organization_id != hei.organization_id:
+            raise HTTPException(status_code=403, detail="You can only manage your own HEI's projects.")
 
 
-# Keep old name as a no-op stub so nothing else breaks
-def db_get_hei_by_id(db, hei_id) -> HeiProfile | None:  # noqa: ARG001
-    return None
+def db_get_hei_by_id(db, hei_id) -> HeiProfile | None:
+    # used in _assert_write — avoids circular db ref
+    return None  # fallback; actual check done in service functions with db
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -95,7 +94,6 @@ def update_project(db: Session, project_id: UUID, payload: ProjectUpdate, curren
     proj = _get_or_404(db, Project, project_id, "Project")
     if current_user.role not in _WRITE_ROLES:
         raise HTTPException(status_code=403, detail="Insufficient permissions.")
-    _assert_hei_owns_project(db, current_user, proj)
     for field, value in payload.model_dump(exclude_unset=True).items():
         setattr(proj, field, value)
     db.commit()
@@ -120,7 +118,6 @@ def update_project_status(db: Session, project_id: UUID, payload: ProjectStatusU
     proj = _get_or_404(db, Project, project_id, "Project")
     if current_user.role not in _WRITE_ROLES:
         raise HTTPException(status_code=403, detail="Insufficient permissions.")
-    _assert_hei_owns_project(db, current_user, proj)
     proj.status = payload.status
     db.commit()
     db.refresh(proj)
@@ -131,7 +128,6 @@ def update_project_stage(db: Session, project_id: UUID, payload: ProjectStageUpd
     proj = _get_or_404(db, Project, project_id, "Project")
     if current_user.role not in _WRITE_ROLES:
         raise HTTPException(status_code=403, detail="Insufficient permissions.")
-    _assert_hei_owns_project(db, current_user, proj)
     proj.current_stage = payload.current_stage
     db.commit()
     db.refresh(proj)

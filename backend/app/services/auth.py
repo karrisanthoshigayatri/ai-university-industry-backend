@@ -19,13 +19,10 @@ INVALID_CREDENTIALS = HTTPException(
 
 
 def register_user(db: Session, payload: RegisterRequest) -> User:
-    # Roles that cannot be self-registered — must be created by a System Administrator
-    _BLOCKED_SELF_REGISTER = {"System Administrator", "Government Officer"}
-    if payload.role in _BLOCKED_SELF_REGISTER:
+    if payload.role == "System Administrator":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail=f"'{payload.role}' accounts cannot be self-registered. "
-                   "Contact a System Administrator.",
+            detail="System Administrator accounts cannot be self-registered",
         )
     if db.get(Organization, payload.organization_id) is None:
         raise HTTPException(
