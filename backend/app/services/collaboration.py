@@ -70,8 +70,19 @@ def get_request(db: Session, request_id: UUID) -> CollaborationRequest:
 def update_request_status(db: Session, request_id: UUID, payload: CollabStatusUpdate,
                            current_user: User) -> CollaborationRequest:
     obj = _get_or_404(db, CollaborationRequest, request_id, "Collaboration request")
+
     if current_user.role not in _RESPOND | {"Government Officer"}:
         raise HTTPException(status_code=403, detail="Insufficient permissions.")
+
+    # Partner-role users may only respond to requests directed at their own organisation
+    if current_user.role in _RESPOND and current_user.role != "System Administrator":
+        partner = db.get(PartnerProfile, obj.partner_id)
+        if partner is None or current_user.organization_id != partner.organization_id:
+            raise HTTPException(
+                status_code=403,
+                detail="You can only respond to collaboration requests directed at your organisation.",
+            )
+
     obj.status = payload.status
     obj.responded_at = datetime.now(timezone.utc).replace(tzinfo=None)
     if payload.response_message:

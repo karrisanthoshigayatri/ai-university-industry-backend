@@ -94,6 +94,7 @@ def update_project(db: Session, project_id: UUID, payload: ProjectUpdate, curren
     proj = _get_or_404(db, Project, project_id, "Project")
     if current_user.role not in _WRITE_ROLES:
         raise HTTPException(status_code=403, detail="Insufficient permissions.")
+    _assert_hei_owns_project(db, current_user, proj)
     for field, value in payload.model_dump(exclude_unset=True).items():
         setattr(proj, field, value)
     db.commit()
@@ -118,6 +119,7 @@ def update_project_status(db: Session, project_id: UUID, payload: ProjectStatusU
     proj = _get_or_404(db, Project, project_id, "Project")
     if current_user.role not in _WRITE_ROLES:
         raise HTTPException(status_code=403, detail="Insufficient permissions.")
+    _assert_hei_owns_project(db, current_user, proj)
     proj.status = payload.status
     db.commit()
     db.refresh(proj)
@@ -128,6 +130,7 @@ def update_project_stage(db: Session, project_id: UUID, payload: ProjectStageUpd
     proj = _get_or_404(db, Project, project_id, "Project")
     if current_user.role not in _WRITE_ROLES:
         raise HTTPException(status_code=403, detail="Insufficient permissions.")
+    _assert_hei_owns_project(db, current_user, proj)
     proj.current_stage = payload.current_stage
     db.commit()
     db.refresh(proj)

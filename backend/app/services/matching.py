@@ -88,7 +88,17 @@ def run_hei_matching(
     current_user: User,
     top_n: int = DEFAULT_TOP_N,
 ) -> HeiMatchResponse:
-    """Run the full matching pipeline and return ranked HEI results."""
+    """Run the full matching pipeline and return ranked HEI results.
+
+    Authorization: Government Officers, System Administrators, HEI Administrators only.
+    """
+    _MATCHING_ROLES = {"Government Officer", "System Administrator", "HEI Administrator"}
+    if current_user.role not in _MATCHING_ROLES:
+        raise HTTPException(
+            status_code=403,
+            detail="Only Government Officers, System Administrators, and HEI Administrators "
+                   "can trigger HEI matching.",
+        )
 
     # ── 1. Load problem ───────────────────────────────────────────────────────
     problem = db.get(Problem, problem_id)

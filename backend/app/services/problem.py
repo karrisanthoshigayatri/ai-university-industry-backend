@@ -70,12 +70,27 @@ def create_problem(db: Session, payload: ProblemCreate, current_user: User) -> P
 def get_problems(db: Session, current_user: User) -> list[Problem]:
     """Return problems visible to this user.
 
+    - System Administrators and Government Officers see all problems.
+    - HEI / Faculty / Industry / Research / CSR / Student users see all
+      Validated-and-beyond problems (crowdsource browse view).
     - Citizens see only their own submissions.
-    - Government Officers and System Administrators see all problems.
     """
+    _PUBLIC_BROWSE_ROLES = {
+        "HEI Administrator", "Faculty / Expert", "Student",
+        "Industry / MSME / Startup", "Research Institution", "CSR Organization",
+    }
+    _VALIDATED_AND_BEYOND = {
+        "Validated", "Matched", "Accepted", "Active", "Completed",
+    }
 
     if _is_privileged(current_user):
         statement = select(Problem).order_by(Problem.submission_date.desc())
+    elif current_user.role in _PUBLIC_BROWSE_ROLES:
+        statement = (
+            select(Problem)
+            .where(Problem.current_status.in_(_VALIDATED_AND_BEYOND))
+            .order_by(Problem.submission_date.desc())
+        )
     else:
         statement = (
             select(Problem)
@@ -87,9 +102,26 @@ def get_problems(db: Session, current_user: User) -> list[Problem]:
 
 def get_problem(db: Session, problem_id: UUID, current_user: User) -> Problem:
     """Return a single problem, enforcing visibility rules."""
+    _PUBLIC_BROWSE_ROLES = {
+        "HEI Administrator", "Faculty / Expert", "Student",
+        "Industry / MSME / Startup", "Research Institution", "CSR Organization",
+    }
+    _VALIDATED_AND_BEYOND = {
+        "Validated", "Matched", "Accepted", "Active", "Completed",
+    }
 
     problem = _get_problem_or_404(db, problem_id)
-    if not _is_privileged(current_user) and problem.submitter_id != current_user.user_id:
+
+    if _is_privileged(current_user):
+        return problem
+    if current_user.role in _PUBLIC_BROWSE_ROLES:
+        if problem.current_status in _VALIDATED_AND_BEYOND:
+            return problem
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="This problem is not yet publicly visible.",
+        )
+    if problem.submitter_id != current_user.user_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You do not have permission to view this problem",
